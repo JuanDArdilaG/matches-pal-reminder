@@ -3,8 +3,8 @@ import { run } from "./script";
 
 const app = express();
 
-app.post("/run-script", (req, res) => {
-  run();
+app.post("/run-script", async (req, res) => {
+  await run();
   res.send("Script started");
 });
 
