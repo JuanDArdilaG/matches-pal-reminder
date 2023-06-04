@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMail = void 0;
 const nodemailer_1 = require("nodemailer");
 function sendMail(partidos) {
+    var _a, _b;
     const partidosPorLiga = {};
     for (const partido of partidos) {
         if (!partidosPorLiga[partido.liga]) {
@@ -13,10 +14,10 @@ function sendMail(partidos) {
     // Crear el HTML para el correo electrónico
     let htmlData = "";
     for (const liga in partidosPorLiga) {
-        htmlData += `<h1>${liga}</h1>`;
+        htmlData += `<h2>${liga}</h2>`;
         htmlData += "<table>";
         for (const partido of partidosPorLiga[liga]) {
-            const formattedDate = new Date(partido.timestamp + 5 * 60 * 60 * 1000).toLocaleDateString("es-CO", {
+            const formattedDate = new Date(partido.timestamp).toLocaleDateString("es-CO", {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
@@ -26,15 +27,15 @@ function sendMail(partidos) {
             htmlData += "<tr>";
             htmlData += `<td>${formattedDate}</td>`;
             htmlData += `<td>${partido.jugador1}</td>`;
-            htmlData += `<td>${partido.score1}</td>`;
-            htmlData += `<td>${partido.score2}</td>`;
+            htmlData += `<td>${(_a = partido.score1) !== null && _a !== void 0 ? _a : "_"}</td>`;
+            htmlData += `<td>-</td>`;
+            htmlData += `<td>${(_b = partido.score2) !== null && _b !== void 0 ? _b : "_"}</td>`;
             htmlData += `<td>${partido.jugador2}</td>`;
             htmlData += "</tr>";
         }
         htmlData += "</table>";
     }
     console.log({ htmlData });
-    return;
     let transporter = (0, nodemailer_1.createTransport)({
         service: "gmail",
         auth: {

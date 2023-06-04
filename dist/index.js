@@ -5,7 +5,7 @@ const notification_1 = require("./notification");
 async function run() {
     const ligas = [
         {
-            name: "LigaBetplay",
+            name: "Liga Betplay",
             config: {
                 url: "https://dimayor.com.co/liga-betplay-dimayor/",
                 rootSelector: ".Opta-js-main",
@@ -30,16 +30,6 @@ async function run() {
 }
 run();
 function filtrarPartidosPorFecha(partidos, fechaBuscada) {
-    const options = {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-    };
-    const formatter = new Intl.DateTimeFormat("es-CO", options);
-    // Convertir la fecha buscada a UTC-5
-    const fechaBuscadaUTC5 = (0, browser_1.convertFromUTC)(fechaBuscada.toISOString().split("T")[0], fechaBuscada.toISOString().split("T")[1].split("-")[0].split(".")[0]);
-    const fechaBuscadaString = formatter.format(fechaBuscadaUTC5);
     const partidasFiltradas = partidos.filter((partido) => {
         const fechaPartidaDate = new Date(partido.timestamp);
         if (isNaN(fechaPartidaDate.getTime())) {
@@ -47,8 +37,8 @@ function filtrarPartidosPorFecha(partidos, fechaBuscada) {
         }
         // Convertir la fecha de la partida a UTC-5
         const fechaPartidaUTC5 = (0, browser_1.convertFromUTC)(fechaPartidaDate.toISOString().split("T")[0], fechaPartidaDate.toISOString().split("T")[1].split("-")[0].split(".")[0]);
-        const fechaPartidaString = formatter.format(fechaPartidaUTC5);
-        return fechaPartidaString === fechaBuscadaString;
+        return (fechaBuscada.toISOString().split("T")[0] ===
+            fechaPartidaUTC5.toISOString().split("T")[0]);
     });
     return partidasFiltradas;
 }
