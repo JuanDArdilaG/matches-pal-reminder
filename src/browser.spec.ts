@@ -1,4 +1,4 @@
-import { convertFromUTC, convertToUTC } from "./browser";
+import { convertFromUTC, convertToUTC } from "./dates";
 
 describe("convertFromUTC", () => {
   it("should convert UTC date and time to local date and time in UTC-5", () => {

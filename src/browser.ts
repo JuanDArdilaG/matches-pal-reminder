@@ -11,6 +11,14 @@ export class Browser {
     this._cache = new BrowserCache();
   }
 
+  get config(): BrowserConfig {
+    return this._config;
+  }
+
+  delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   async launch(): Promise<Partido[]> {
     if (!this._cache.isExpired()) {
       const minutesUntilExpiry =
@@ -30,7 +38,7 @@ export class Browser {
     }
     this._puppeter = await puppeteer.launch({
       headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: ["--no-sandbox"],
     });
     if (!this._puppeter) {
       throw new Error("No se pudo lanzar el navegador");
@@ -39,6 +47,7 @@ export class Browser {
 
     await page.goto(this._config.url);
     const element = await page.waitForSelector(this._config.rootSelector);
+    await this.delay(this._config.delay);
 
     const partidas = await page.evaluate((element) => {
       const convertTextualDate = (textualDate: string): Date => {
@@ -170,32 +179,4 @@ export class Browser {
   async close(): Promise<void> {
     await this._puppeter?.close();
   }
-}
-
-export function convertToUTC(dateString: string, timeString: string): Date {
-  let adjustedDate;
-
-  if (/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/.test(timeString)) {
-    let dateLocal = new Date(`${dateString}T${timeString}`);
-    let localTimeInMilliseconds = dateLocal.getTime();
-    adjustedDate = new Date(localTimeInMilliseconds);
-  } else {
-    adjustedDate = new Date(`${dateString}T07:00:00`);
-  }
-
-  return adjustedDate;
-}
-
-export function convertFromUTC(dateString: string, timeString: string): Date {
-  let adjustedDate;
-
-  if (/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/.test(timeString)) {
-    let dateInUTC = new Date(`${dateString}T${timeString}Z`);
-    let utcTimeInMilliseconds = dateInUTC.getTime() - 5 * 60 * 60 * 1000;
-    adjustedDate = new Date(utcTimeInMilliseconds);
-  } else {
-    adjustedDate = new Date(`${dateString}T07:00:00`);
-  }
-
-  return adjustedDate;
 }

@@ -1,7 +1,9 @@
-import { Browser, convertFromUTC } from "./browser";
+import { Browser } from "./browser";
 import { sendMail } from "./notification";
 import { LigaConfig } from "./liga_config";
 import { Partido } from "./partido";
+import { convertFromUTC } from "./dates";
+import { Scrapper } from "./scrapper";
 
 export async function run() {
   const ligas: LigaConfig[] = [
@@ -10,13 +12,15 @@ export async function run() {
       config: {
         url: "https://dimayor.com.co/liga-betplay-dimayor/",
         rootSelector: ".Opta-js-main",
+        delay: 0,
       },
     },
   ];
   const partidosTotales: Partido[] = [];
   for (const liga of ligas) {
     const browser = new Browser(liga.config);
-    const partidos = await browser.launch();
+    const scrapper = new Scrapper(browser);
+    const partidos = await scrapper.run();
 
     console.log(`Partidos de ${liga.name}`);
 
@@ -37,7 +41,7 @@ export async function run() {
     await browser.close();
   }
 
-  sendMail(partidosTotales);
+  await sendMail(partidosTotales);
 }
 
 function filtrarPartidosPorFecha(

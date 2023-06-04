@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const script_1 = require("./script");
 const app = (0, express_1.default)();
-app.post("/run-script", (req, res) => {
-    (0, script_1.run)();
+app.post("/run-script", async (req, res) => {
+    await (0, script_1.run)();
     res.send("Script started");
 });
 let port = process.env.PORT;
