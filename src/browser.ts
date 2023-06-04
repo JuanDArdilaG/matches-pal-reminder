@@ -1,4 +1,4 @@
-import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer";
+import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer-core";
 import { BrowserConfig } from "./browser_config";
 import { Page } from "./page";
 import { BrowserCache } from "./browser_cache";
@@ -28,7 +28,10 @@ export class Browser {
         console.log("Error loading from cache", error);
       }
     }
-    this._puppeter = await puppeteer.launch({ headless: "new" });
+    this._puppeter = await puppeteer.launch({
+      headless: "new",
+      executablePath: process.env.CHROME_BIN || undefined,
+    });
     if (!this._puppeter) {
       throw new Error("No se pudo lanzar el navegador");
     }
@@ -37,7 +40,7 @@ export class Browser {
     await page.goto(this._config.url);
     const element = await page.waitForSelector(this._config.rootSelector);
 
-    const partidas = await page.evaluate((element) => {
+    const partidas = await page.evaluate((element: HTMLElement) => {
       const convertTextualDate = (textualDate: string): Date => {
         // Separamos la fecha en componentes
         const components = textualDate.split(" ");
