@@ -28,6 +28,7 @@ export class Browser {
         console.log("Error loading from cache", error);
       }
     }
+    console.log(`Chrome executable path: ${process.env.CHROME_BIN}`);
     this._puppeter = await puppeteer.launch({
       headless: "new",
       executablePath: process.env.CHROME_BIN || undefined,
