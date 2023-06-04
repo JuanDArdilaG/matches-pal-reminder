@@ -1,4 +1,4 @@
-import { Page as PuppeteerPage } from "puppeteer";
+import { Page as PuppeteerPage } from "puppeteer-core";
 
 export class Page {
   constructor(private _puppeter: PuppeteerPage) {
