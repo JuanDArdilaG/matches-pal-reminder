@@ -28,9 +28,9 @@ export class Browser {
         console.log("Error loading from cache", error);
       }
     }
-    console.log(`Chrome executable path: ${process.env.CHROME_BIN}`);
     this._puppeter = await puppeteer.launch({
       headless: "new",
+      executablePath: "/app/.apt/usr/bin/google-chrome",
     });
     if (!this._puppeter) {
       throw new Error("No se pudo lanzar el navegador");
