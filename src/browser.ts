@@ -40,7 +40,7 @@ export class Browser {
     await page.goto(this._config.url);
     const element = await page.waitForSelector(this._config.rootSelector);
 
-    const partidas = await page.evaluate((element: HTMLElement) => {
+    const partidas = await page.evaluate((element: Element | null) => {
       const convertTextualDate = (textualDate: string): Date => {
         // Separamos la fecha en componentes
         const components = textualDate.split(" ");
