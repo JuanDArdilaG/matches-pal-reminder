@@ -1,4 +1,4 @@
-import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer-core";
+import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer";
 import { BrowserConfig } from "./browser_config";
 import { Page } from "./page";
 import { BrowserCache } from "./browser_cache";
@@ -41,7 +41,7 @@ export class Browser {
     await page.goto(this._config.url);
     const element = await page.waitForSelector(this._config.rootSelector);
 
-    const partidas = await page.evaluate((element: Element | null) => {
+    const partidas = await page.evaluate((element) => {
       const convertTextualDate = (textualDate: string): Date => {
         // Separamos la fecha en componentes
         const components = textualDate.split(" ");
