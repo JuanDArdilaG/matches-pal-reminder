@@ -40,8 +40,6 @@ export async function run() {
   sendMail(partidosTotales);
 }
 
-run();
-
 function filtrarPartidosPorFecha(
   partidos: Partido[],
   fechaBuscada: Date

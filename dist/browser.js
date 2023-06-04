@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertFromUTC = exports.convertToUTC = exports.Browser = void 0;
-const puppeteer_1 = require("puppeteer");
+const puppeteer_1 = __importDefault(require("puppeteer"));
 const page_1 = require("./page");
 const browser_cache_1 = require("./browser_cache");
 class Browser {
@@ -21,7 +24,9 @@ class Browser {
                 console.log("Error loading from cache", error);
             }
         }
-        this._puppeter = await puppeteer_1.default.launch({ headless: "new" });
+        this._puppeter = await puppeteer_1.default.launch({
+            headless: "new",
+        });
         if (!this._puppeter) {
             throw new Error("No se pudo lanzar el navegador");
         }
