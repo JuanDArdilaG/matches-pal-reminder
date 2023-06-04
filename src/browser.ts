@@ -1,4 +1,4 @@
-import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer-core";
+import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer";
 import { BrowserConfig } from "./browser_config";
 import { Page } from "./page";
 import { BrowserCache } from "./browser_cache";
