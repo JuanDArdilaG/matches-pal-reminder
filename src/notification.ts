@@ -20,9 +20,6 @@ export function sendMail(partidos: Partido[]) {
       const formattedDate = new Date(partido.timestamp).toLocaleDateString(
         "es-CO",
         {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
           hour: "numeric",
           minute: "numeric",
         }
