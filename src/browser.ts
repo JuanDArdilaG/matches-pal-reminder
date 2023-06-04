@@ -31,7 +31,6 @@ export class Browser {
     console.log(`Chrome executable path: ${process.env.CHROME_BIN}`);
     this._puppeter = await puppeteer.launch({
       headless: "new",
-      executablePath: process.env.CHROME_BIN || undefined,
     });
     if (!this._puppeter) {
       throw new Error("No se pudo lanzar el navegador");
