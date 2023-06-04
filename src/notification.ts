@@ -17,13 +17,12 @@ export function sendMail(partidos: Partido[]) {
     htmlData += `<h2>${liga}</h2>`;
     htmlData += "<table>";
     for (const partido of partidosPorLiga[liga]) {
-      const formattedDate = new Date(partido.timestamp).toLocaleDateString(
-        "es-CO",
-        {
-          hour: "numeric",
-          minute: "numeric",
-        }
-      );
+      const formattedDate = new Date(
+        partido.timestamp - 5 * 60 * 60 * 1000
+      ).toLocaleDateString(undefined, {
+        hour: "numeric",
+        minute: "numeric",
+      });
       htmlData += "<tr>";
       htmlData += `<td>${formattedDate}</td>`;
       htmlData += `<td>${partido.jugador1}</td>`;
