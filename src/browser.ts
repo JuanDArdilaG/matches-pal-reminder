@@ -30,6 +30,7 @@ export class Browser {
     }
     this._puppeter = await puppeteer.launch({
       headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     if (!this._puppeter) {
       throw new Error("No se pudo lanzar el navegador");
