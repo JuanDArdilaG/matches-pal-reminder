@@ -1,5 +1,6 @@
 import { createTransport } from "nodemailer";
 import { Partido } from "./partido";
+import mqtt from "mqtt";
 
 export async function sendMail(partidos: Partido[]): Promise<void> {
   const partidosPorLiga: { [liga: string]: Partido[] } = {};
@@ -60,5 +61,17 @@ export async function sendMail(partidos: Partido[]): Promise<void> {
         resolve();
       }
     });
+  });
+}
+
+export async function sendMQTTMessage(
+  topic: string,
+  message: string
+): Promise<void> {
+  const client = mqtt.connect("mqtt://localhost"); // url de tu broker
+
+  client.on("connect", function () {
+    client.publish(topic, message);
+    console.log("Mensaje enviado");
   });
 }

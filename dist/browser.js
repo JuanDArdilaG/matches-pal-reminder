@@ -12,6 +12,12 @@ class Browser {
         this._config = _config;
         this._cache = new browser_cache_1.BrowserCache();
     }
+    get config() {
+        return this._config;
+    }
+    delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
     async launch() {
         if (!this._cache.isExpired()) {
             const minutesUntilExpiry = (this._cache.expiration - Date.now()) / 1000 / 60;
@@ -27,6 +33,7 @@ class Browser {
         this._puppeter = await puppeteer_1.default.launch({
             headless: "new",
             args: ["--no-sandbox"],
+            executablePath: "/usr/bin/google-chrome",
         });
         if (!this._puppeter) {
             throw new Error("No se pudo lanzar el navegador");
@@ -34,6 +41,7 @@ class Browser {
         const page = (await this.newPage()).puppeteer;
         await page.goto(this._config.url);
         const element = await page.waitForSelector(this._config.rootSelector);
+        await this.delay(this._config.delay);
         const partidas = await page.evaluate((element) => {
             var _a, _b, _c, _d, _e, _f;
             const convertTextualDate = (textualDate) => {

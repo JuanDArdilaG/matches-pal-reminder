@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendMail = void 0;
+exports.sendMQTTMessage = exports.sendMail = void 0;
 const nodemailer_1 = require("nodemailer");
-function sendMail(partidos) {
+const mqtt_1 = __importDefault(require("mqtt"));
+async function sendMail(partidos) {
     var _a, _b;
     const partidosPorLiga = {};
     for (const partido of partidos) {
@@ -22,11 +26,11 @@ function sendMail(partidos) {
                 minute: "numeric",
             });
             htmlData += "<tr>";
-            htmlData += `<td>${formattedDate}</td>`;
+            htmlData += `<td>${formattedDate.split(",")[1]}</td>`;
             htmlData += `<td>${partido.jugador1}</td>`;
-            htmlData += `<td>${(_a = partido.score1) !== null && _a !== void 0 ? _a : "_"}</td>`;
+            htmlData += `<td>${(_a = partido.score1) !== null && _a !== void 0 ? _a : " "}</td>`;
             htmlData += `<td>-</td>`;
-            htmlData += `<td>${(_b = partido.score2) !== null && _b !== void 0 ? _b : "_"}</td>`;
+            htmlData += `<td>${(_b = partido.score2) !== null && _b !== void 0 ? _b : " "}</td>`;
             htmlData += `<td>${partido.jugador2}</td>`;
             htmlData += "</tr>";
         }
@@ -46,13 +50,25 @@ function sendMail(partidos) {
         subject: "Partidos Del Día",
         html: htmlData,
     };
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error);
-        }
-        else {
-            console.log("Email sent: " + info.response);
-        }
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+                reject(error);
+            }
+            else {
+                console.log("Email sent: " + info.response);
+                resolve();
+            }
+        });
     });
 }
 exports.sendMail = sendMail;
+async function sendMQTTMessage(topic, message) {
+    const client = mqtt_1.default.connect("mqtt://localhost"); // url de tu broker
+    client.on("connect", function () {
+        client.publish(topic, message);
+        console.log("Mensaje enviado");
+    });
+}
+exports.sendMQTTMessage = sendMQTTMessage;

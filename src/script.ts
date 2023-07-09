@@ -1,5 +1,5 @@
 import { Browser } from "./browser";
-import { sendMail } from "./notification";
+import { sendMQTTMessage, sendMail } from "./notification";
 import { LigaConfig } from "./liga_config";
 import { Partido } from "./partido";
 import { convertFromUTC } from "./dates";
@@ -12,6 +12,14 @@ export async function run() {
       config: {
         url: "https://dimayor.com.co/liga-betplay-dimayor/",
         rootSelector: ".Opta-js-main",
+        delay: 0,
+      },
+    },
+    {
+      name: "Mundial Sub-20",
+      config: {
+        url: "https://www.fifa.com/fifaplus/en/tournaments/mens/u20worldcup/argentina-2023/scores-fixtures?sortBy=date&country=CO&wtw-filter=ALL",
+        rootSelector: ".ff-p-0",
         delay: 0,
       },
     },
@@ -41,7 +49,8 @@ export async function run() {
     await browser.close();
   }
 
-  await sendMail(partidosTotales);
+  sendMail(partidosTotales);
+  sendMQTTMessage("macbook.notification", "Hello mqtt");
 }
 
 function filtrarPartidosPorFecha(

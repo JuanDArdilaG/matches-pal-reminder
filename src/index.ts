@@ -6,9 +6,6 @@ const app = express();
 app.use(
   helmet({
     frameguard: false,
-    // Configuración personalizada para simular ser un humano
-    // Establecer el User-Agent para simular un navegador web
-    // Puedes cambiar el valor a cualquier User-Agent válido
     // Aquí se muestra un ejemplo de ser un usuario de Chrome en Windows 10
     contentSecurityPolicy: {
       directives: {
@@ -27,13 +24,17 @@ app.use(
         "block-all-mixed-content": [],
       },
     },
-    // Configuración adicional según tus necesidades
   })
 );
 
-app.post("/run-script", async (req, res) => {
-  await run();
-  res.send("Script started");
+app.post("/run-script", async (_, res) => {
+  try {
+    await run();
+    res.send("script executed");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("error");
+  }
 });
 
 let port = process.env.PORT;

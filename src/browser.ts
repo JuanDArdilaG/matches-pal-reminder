@@ -39,6 +39,7 @@ export class Browser {
     this._puppeter = await puppeteer.launch({
       headless: "new",
       args: ["--no-sandbox"],
+      executablePath: "/usr/bin/google-chrome",
     });
     if (!this._puppeter) {
       throw new Error("No se pudo lanzar el navegador");
