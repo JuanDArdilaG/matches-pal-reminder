@@ -1,54 +1,65 @@
-import puppeteer, { Browser as PuppeteerBrowser } from "puppeteer";
-import { BrowserConfig } from "./browser_config";
-import { Page } from "./page";
-import { BrowserCache } from "./browser_cache";
-import { Partido } from "./partido";
+import puppeteer, { Browser as PBrowser } from "puppeteer";
+import { Browser } from "../domain/Browser";
+import { BrowserConfig } from "../domain/BrowserConfig";
+import { BrowserCache } from "../domain/BrowserCache";
+import { ScrapperResult } from "../../../Scrapper/domain/ScrapperResult";
+import { PuppeteerPage } from "../../Page/infrastructure/PuppeteerPage";
+import { StringValueObject } from "@juandardilag/value-objects";
+import { Match } from "../../../Matches/domain/Match";
+import { MatchDate } from "../../../Matches/domain/MatchDate";
 
-export class Browser {
-  private _cache: BrowserCache;
-  private _puppeter: PuppeteerBrowser | undefined;
-  constructor(private _config: BrowserConfig) {
-    this._cache = new BrowserCache();
+export class PuppeteerBrowser implements Browser {
+  constructor(
+    private _config: BrowserConfig,
+    private _cache: BrowserCache,
+    private _browser: PBrowser | undefined
+  ) {}
+
+  get delay(): number {
+    return this._config.delay;
   }
 
-  get config(): BrowserConfig {
-    return this._config;
+  set delay(value: number) {
+    this._config.delay = value;
   }
 
-  delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  wait() {
+    return new Promise((resolve) => setTimeout(resolve, this._config.delay));
   }
 
-  async launch(): Promise<Partido[]> {
+  async newPage(): Promise<PuppeteerPage> {
+    if (!this._browser) {
+      throw new Error("No se pudo lanzar el navegador");
+    }
+    return new PuppeteerPage(await this._browser.newPage());
+  }
+
+  async run(): Promise<ScrapperResult> {
     if (!this._cache.isExpired()) {
-      const minutesUntilExpiry =
-        (this._cache.expiration - Date.now()) / 1000 / 60;
-      const elapsedLifeTime = this._cache.elapsedLifeTime();
-      console.log(
-        `Returning cached data. Created ${elapsedLifeTime.toFixed(
-          0
-        )} minutes ago. Expiry in ${minutesUntilExpiry.toFixed(0)} minutes.`
+      const elapsedLifeTime = this._cache.elapsedLifeTime;
+      console.debug(
+        `Returning cached data. Created ${elapsedLifeTime} minutes ago. Expiry in ${this._cache.minutesToExpire} minutes.`
       );
 
       try {
-        return this._cache.load().partidas;
+        return ScrapperResult.fromMatches(this._cache.load().matches);
       } catch (error) {
         console.log("Error loading from cache", error);
       }
     }
-    this._puppeter = await puppeteer.launch({
+    this._browser = await puppeteer.launch({
       headless: "new",
       args: ["--no-sandbox"],
       executablePath: "/usr/bin/google-chrome",
     });
-    if (!this._puppeter) {
+    if (!this._browser) {
       throw new Error("No se pudo lanzar el navegador");
     }
-    const page = (await this.newPage()).puppeteer;
+    const page = await this.newPage();
 
     await page.goto(this._config.url);
     const element = await page.waitForSelector(this._config.rootSelector);
-    await this.delay(this._config.delay);
+    await this.wait();
 
     const partidas = await page.evaluate((element) => {
       const convertTextualDate = (textualDate: string): Date => {
@@ -97,21 +108,8 @@ export class Browser {
         const date = new Date(dateString);
         return date;
       };
-      const convertToUTC = (dateString: string, timeString: string): Date => {
-        let adjustedDate;
 
-        if (/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/.test(timeString)) {
-          let dateLocal = new Date(`${dateString}T${timeString}`);
-          let localTimeInMilliseconds = dateLocal.getTime();
-          adjustedDate = new Date(localTimeInMilliseconds);
-        } else {
-          adjustedDate = new Date(`${dateString}T07:00:00`);
-        }
-
-        return adjustedDate;
-      };
-
-      const resultado: Partido[] = [];
+      const resultado: Match[] = [];
 
       let fechaActual = "";
 
@@ -143,18 +141,21 @@ export class Browser {
           const jugador2 = jugador2Element.textContent?.trim() || "";
           const date = convertTextualDate(fechaActual);
 
-          resultado.push({
-            timestamp: convertToUTC(
-              date.toISOString().split("T")[0],
-              horaActual + ":00"
-            ).getTime(),
-            jugador1,
-            score1: parseInt(score1),
-            score2: parseInt(score2),
-            jugador2,
-            liga: "",
-            html: cellsHtml,
-          });
+          resultado.push(
+            new Match(
+              StringValueObject.empty(),
+              new MatchDate(new Date(`${date.toISOString().split("T")[0]}T${timeString}`);),
+              convertToUTC(
+                ,
+                horaActual + ":00"
+              ).getTime(),
+              jugador1,
+              parseInt(score1),
+              parseInt(score2),
+              jugador2,
+              cellsHtml
+            )
+          );
         } else if (horaElement) {
           const fechaElement = horaElement.querySelector("td h3");
           if (fechaElement) {
@@ -167,17 +168,10 @@ export class Browser {
     }, element);
 
     this._cache.save(partidas);
-    return partidas;
-  }
-
-  async newPage(): Promise<Page> {
-    if (!this._puppeter) {
-      throw new Error("No se pudo lanzar el navegador");
-    }
-    return new Page(await this._puppeter.newPage());
+    return ScrapperResult.fromMatches(partidas);
   }
 
   async close(): Promise<void> {
-    await this._puppeter?.close();
+    await this._browser?.close();
   }
 }

@@ -1,4 +1,4 @@
-export function convertToUTC(dateString: string, timeString: string): Date {
+function convertToUTC(dateString: string, timeString: string): Date {
   let adjustedDate;
 
   if (/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/.test(timeString)) {
@@ -12,7 +12,7 @@ export function convertToUTC(dateString: string, timeString: string): Date {
   return adjustedDate;
 }
 
-export function convertFromUTC(dateString: string, timeString: string): Date {
+function convertFromUTC(dateString: string, timeString: string): Date {
   let adjustedDate;
 
   if (/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/.test(timeString)) {

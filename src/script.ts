@@ -1,79 +1,52 @@
-import { Browser } from "./browser";
-import { sendMQTTMessage, sendMail } from "./notification";
-import { LigaConfig } from "./liga_config";
-import { Partido } from "./partido";
-import { convertFromUTC } from "./dates";
-import { Scrapper } from "./scrapper";
+import { MatchDate } from "./Matches/domain/MatchDate";
+import { Match } from "./Matches/domain/Match";
+import { LeagueConfig } from "./League/domain/LeagueConfig";
+import { Browser } from "./Browser/Browser/domain/Browser";
+import { NodemailerNotificatorMailer } from "./Notificator/infrastructure/NodemailerNotificatorMailer";
+import { MQTTNotificatorMQTT } from "./Notificator/infrastructure/mqttNotificatorMQTT";
+import { Notificator } from "./Notificator/domain/Notificator";
+import { FilterByDate } from "./Matches/application/FilterByDate";
+import { Scrapper } from "./Scrapper/domain/Scrapper";
+
+const mailer = new NodemailerNotificatorMailer();
+const mqtt = new MQTTNotificatorMQTT("mqtt://localhost");
+const notificator = new Notificator(mailer, mqtt);
+
+const filterByDate = new FilterByDate();
 
 export async function run() {
-  const ligas: LigaConfig[] = [
-    {
-      name: "Liga Betplay",
-      config: {
-        url: "https://dimayor.com.co/liga-betplay-dimayor/",
-        rootSelector: ".Opta-js-main",
-        delay: 0,
-      },
-    },
-    {
-      name: "Mundial Sub-20",
-      config: {
-        url: "https://www.fifa.com/fifaplus/en/tournaments/mens/u20worldcup/argentina-2023/scores-fixtures?sortBy=date&country=CO&wtw-filter=ALL",
-        rootSelector: ".ff-p-0",
-        delay: 0,
-      },
-    },
+  const leagues: LeagueConfig[] = [
+    new LeagueConfig("Liga Betplay", {
+      url: "https://dimayor.com.co/liga-betplay-dimayor/",
+      rootSelector: ".Opta-js-main",
+      delay: 0,
+    }),
+    new LeagueConfig("Mundial Sub-20", {
+      url: "https://www.fifa.com/fifaplus/en/tournaments/mens/u20worldcup/argentina-2023/scores-fixtures?sortBy=date&country=CO&wtw-filter=ALL",
+      rootSelector: ".ff-p-0",
+      delay: 0,
+    }),
   ];
-  const partidosTotales: Partido[] = [];
-  for (const liga of ligas) {
-    const browser = new Browser(liga.config);
-    const scrapper = new Scrapper(browser);
-    const partidos = await scrapper.run();
+  const matches: Match[] = [];
+  for (const league of leagues) {
+    const scrapper = new Scrapper(new Browser(league.config));
+    const matches = await scrapper.run();
 
-    console.log(`Partidos de ${liga.name}`);
+    console.log(`Matches of ${league.name}`);
 
-    for (const partido of partidos) {
-      partido.liga = liga.name;
+    for (const match of matches) {
+      match.liga = league.name;
     }
 
-    const partidosDeHoy = filtrarPartidosPorFecha(
-      partidos,
-      new Date(Date.now())
-    );
+    const todayMatches = await filterByDate.run(matches, MatchDate.now());
 
-    partidosTotales.push(...partidosDeHoy);
+    matches.push(...todayMatches);
 
-    console.log("Partidos totales");
-    console.log("count", partidosTotales.length);
+    console.log("count", matches.length);
 
-    await browser.close();
+    await scrapper.close();
   }
 
-  sendMail(partidosTotales);
-  sendMQTTMessage("macbook.notification", "Hello mqtt");
-}
-
-function filtrarPartidosPorFecha(
-  partidos: Partido[],
-  fechaBuscada: Date
-): Partido[] {
-  const partidasFiltradas = partidos.filter((partido) => {
-    const fechaPartidaDate = new Date(partido.timestamp);
-    if (isNaN(fechaPartidaDate.getTime())) {
-      return false; // Ignorar partidas con fechas no válidas
-    }
-
-    // Convertir la fecha de la partida a UTC-5
-    const fechaPartidaUTC5 = convertFromUTC(
-      fechaPartidaDate.toISOString().split("T")[0],
-      fechaPartidaDate.toISOString().split("T")[1].split("-")[0].split(".")[0]
-    );
-
-    return (
-      fechaBuscada.toISOString().split("T")[0] ===
-      fechaPartidaUTC5.toISOString().split("T")[0]
-    );
-  });
-
-  return partidasFiltradas;
+  notificator.sendMail(matches);
+  notificator.sendMQTTMessage("macbook.notification", "Hello mqtt");
 }
