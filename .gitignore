@@ -3,3 +3,4 @@ partidas_cache.json
 .cache
 .DS_Store
 dist
+.env
