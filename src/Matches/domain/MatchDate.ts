@@ -5,6 +5,49 @@ export class MatchDate extends DateValueObject {
     return new MatchDate(Date.now());
   }
 
+  static fromSpanishTextualDate(textualDate: string): Date {
+    const components = textualDate.split(" ");
+    components.shift(); // Removemos el día de la semana ("Saturday")
+
+    const spanishMonths = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+    const englishMonths = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const monthIndex = spanishMonths.indexOf(components[1].toLowerCase());
+    if (monthIndex !== -1) {
+      components[1] = englishMonths[monthIndex];
+    }
+
+    // Creamos la nueva cadena de fecha sin el día de la semana
+    const dateString = components.join(" ");
+    const date = new Date(dateString);
+    return date;
+  }
+
   get dateString(): string {
     return this.value.toISOString().split("T")[0];
   }

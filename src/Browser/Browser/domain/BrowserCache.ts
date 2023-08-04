@@ -17,6 +17,13 @@ export type BrowserCacheConfig = {
 export class BrowserCache {
   constructor(private _config: BrowserCacheConfig) {}
 
+  static oneDayCache(fileName: string): BrowserCache {
+    return new BrowserCache({
+      fileName,
+      ttl: 1000 * 60 * 60 * 24,
+    });
+  }
+
   save(partidas: Match[]): void {
     const data: CacheData = {
       matches: partidas,
