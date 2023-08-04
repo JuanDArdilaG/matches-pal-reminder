@@ -39,7 +39,7 @@ app.post("/run-script", async (_, res) => {
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = "8000";
+  port = "8008";
 }
 
 app.listen(port, () => {

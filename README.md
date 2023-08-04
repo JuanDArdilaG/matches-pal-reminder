@@ -26,7 +26,7 @@ Matches Pal Reminder (MPR) is a simple server that executes a script to scrape w
 ### Running the server
 
 ```
-npm start
+npm run start:prod
 ```
 
 ### Endpoints

@@ -1,6 +1,7 @@
-FROM node:slim
+FROM node:18-slim
 
-# We don't need the standalone Chromium
+WORKDIR /app
+
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 # Install Google Chrome Stable and fonts
@@ -11,3 +12,19 @@ RUN apt-get update && apt-get install gnupg wget -y && \
   apt-get update && \
   apt-get install google-chrome-stable -y --no-install-recommends && \
   rm -rf /var/lib/apt/lists/*
+
+ADD .env ./
+ADD package*.json ./
+
+RUN npm install --unsafe-perm=true --allow-root
+
+RUN apt-get update && apt-get install -y \
+    tini \
+    && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+COPY . .
+
+EXPOSE 8080
+CMD ["npm", "run", "start:prod"]

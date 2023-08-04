@@ -30,6 +30,14 @@ export class PuppeteerBrowser implements Browser {
     this._config.delay = value;
   }
 
+  get cache(): BrowserCache {
+    return this._cache;
+  }
+
+  set cache(value: BrowserCache) {
+    this._cache = value;
+  }
+
   wait() {
     return new Promise((resolve) => setTimeout(resolve, this._config.delay));
   }
@@ -38,11 +46,11 @@ export class PuppeteerBrowser implements Browser {
     this._browser = await puppeteer.launch({
       headless: "new",
       args: ["--no-sandbox"],
-      executablePath: "/usr/bin/google-chrome",
+      executablePath: process.env.CHROME_PATH,
     });
 
     if (!this._browser) {
-      throw new Error("No se pudo lanzar el navegador");
+      throw new Error("browser could not be launched");
     }
   }
 
@@ -53,7 +61,7 @@ export class PuppeteerBrowser implements Browser {
     return new PuppeteerPage(await this._browser.newPage());
   }
 
-  async run(): Promise<ScrapperResult> {
+  async scrape(): Promise<ScrapperResult> {
     if (!this._cache.isExpired()) {
       const elapsedLifeTime = this._cache.elapsedLifeTime;
       console.debug(
