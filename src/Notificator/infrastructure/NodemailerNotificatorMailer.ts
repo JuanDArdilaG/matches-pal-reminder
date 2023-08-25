@@ -2,6 +2,7 @@ import { EmailValueObject } from "@juandardilag/value-objects";
 import { Match } from "../../Matches/domain/Match";
 import { NotificatorMailer } from "../domain/NotificatorMailer";
 import { createTransport } from "nodemailer";
+import { Logger } from "../../System/Logger/Logger";
 
 export class NodemailerNotificatorMailer implements NotificatorMailer {
   constructor(private _email: EmailValueObject) {}
@@ -53,10 +54,10 @@ export class NodemailerNotificatorMailer implements NotificatorMailer {
     return new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          console.log(error);
+          Logger.error(`${error}`);
           reject(error);
         } else {
-          console.log("Email sent: " + info.response);
+          Logger.info("Email sent: " + info.response);
           resolve();
         }
       });

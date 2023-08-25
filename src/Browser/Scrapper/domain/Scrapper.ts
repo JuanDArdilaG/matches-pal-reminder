@@ -1,4 +1,4 @@
-import { Browser } from "../../Browser/Browser/domain/Browser";
+import { Browser } from "../../Browser/domain/Browser";
 import { ScrapperResult } from "./ScrapperResult";
 
 export class Scrapper {

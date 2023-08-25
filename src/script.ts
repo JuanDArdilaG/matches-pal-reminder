@@ -4,7 +4,7 @@ import { LeagueConfig } from "./League/domain/LeagueConfig";
 import { NodemailerNotificatorMailer } from "./Notificator/infrastructure/NodemailerNotificatorMailer";
 import { MQTTNotificatorMQTT } from "./Notificator/infrastructure/mqttNotificatorMQTT";
 import { Notificator } from "./Notificator/domain/Notificator";
-import { Scrapper } from "./Scrapper/domain/Scrapper";
+import { Scrapper } from "./Browser/Scrapper/domain/Scrapper";
 import dotenv from "dotenv";
 import {
   EmailValueObject,

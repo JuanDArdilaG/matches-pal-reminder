@@ -1,4 +1,4 @@
-import { ScrapperResult } from "../../../Scrapper/domain/ScrapperResult";
+import { ScrapperResult } from "../../Scrapper/domain/ScrapperResult";
 import { BrowserCache } from "./BrowserCache";
 
 export interface Browser {

@@ -1,6 +1,7 @@
 import express from "express";
 import { run } from "./script";
 import helmet from "helmet";
+import { Logger } from "./System/Logger/Logger";
 
 const app = express();
 app.use(
@@ -32,7 +33,7 @@ app.post("/run-script", async (_, res) => {
     await run();
     res.send("script executed");
   } catch (error) {
-    console.log(error);
+    Logger.error((error as Error).message);
     res.status(500).send("error");
   }
 });
@@ -43,5 +44,5 @@ if (port == null || port == "") {
 }
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  Logger.info(`Server running on port ${port}`);
 });

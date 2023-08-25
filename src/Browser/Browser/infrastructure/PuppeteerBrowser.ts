@@ -2,11 +2,13 @@ import puppeteer, { Browser as PBrowser } from "puppeteer";
 import { Browser } from "../domain/Browser";
 import { BrowserConfig } from "../domain/BrowserConfig";
 import { BrowserCache } from "../domain/BrowserCache";
-import { ScrapperResult } from "../../../Scrapper/domain/ScrapperResult";
+import { ScrapperResult } from "../../Scrapper/domain/ScrapperResult";
 import { PuppeteerPage } from "../../Page/infrastructure/PuppeteerPage";
 import { StringValueObject } from "@juandardilag/value-objects";
 import { Match } from "../../../Matches/domain/Match";
 import { MatchDate } from "../../../Matches/domain/MatchDate";
+import { Environment } from "../../../System/Environment/domain/Environment";
+import { Logger } from "../../../System/Logger/Logger";
 
 export class PuppeteerBrowser implements Browser {
   constructor(
@@ -45,8 +47,8 @@ export class PuppeteerBrowser implements Browser {
   async launch(): Promise<void> {
     this._browser = await puppeteer.launch({
       headless: "new",
-      args: ["--no-sandbox"],
-      executablePath: process.env.CHROME_PATH,
+      args: ["--no-sandbox", "--disable-gpu"],
+      executablePath: Environment.chromePath,
     });
 
     if (!this._browser) {
@@ -64,14 +66,14 @@ export class PuppeteerBrowser implements Browser {
   async scrape(): Promise<ScrapperResult> {
     if (!this._cache.isExpired()) {
       const elapsedLifeTime = this._cache.elapsedLifeTime;
-      console.debug(
+      Logger.info(
         `Returning cached data. Created ${elapsedLifeTime} minutes ago. Expiry in ${this._cache.minutesToExpire} minutes.`
       );
 
       try {
         return ScrapperResult.fromMatches(this._cache.load().matches);
       } catch (error) {
-        console.log("Error loading from cache", error);
+        Logger.error(`Error loading from cache: ${error}`);
         throw error;
       }
     }
@@ -81,7 +83,9 @@ export class PuppeteerBrowser implements Browser {
     const page = await this.newPage();
     await page.goto(this._config.url);
 
-    const element = await page.waitForSelector(this._config.rootSelector);
+    const element = await page.puppeteer.waitForSelector(
+      this._config.rootSelector
+    );
     await this.wait();
 
     const partidas = await page.evaluate((element: Element) => {

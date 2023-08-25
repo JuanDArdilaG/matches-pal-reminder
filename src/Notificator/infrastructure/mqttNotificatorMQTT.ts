@@ -1,3 +1,4 @@
+import { Logger } from "../../System/Logger/Logger";
 import { NotificatorMQTT } from "../domain/NotificatorMQTT";
 import mqtt from "mqtt";
 
@@ -8,7 +9,7 @@ export class MQTTNotificatorMQTT implements NotificatorMQTT {
     const client = mqtt.connect(this._host);
     client.on("connect", function () {
       client.publish(topic, message);
-      console.log("Mensaje enviado");
+      Logger.info("Mensaje enviado");
     });
   }
 }
