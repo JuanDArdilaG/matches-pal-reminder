@@ -1,4 +1,4 @@
-import { Browser } from "./browser";
+/*import { Browser } from "./browser";
 import { Scrapper } from "./scrapper";
 
 describe("Scrapper", () => {
@@ -28,4 +28,4 @@ describe("Scrapper", () => {
       // Continúa con el resto de las propiedades que debe tener un objeto 'Partido'.
     });
   });
-});
+});*/

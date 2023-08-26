@@ -1,9 +1,9 @@
 import { DateValueObject } from "@juandardilag/value-objects";
-import { Criteria } from "../../Filter/Criteria";
-import { Filter } from "../../Filter/Filter";
-import { MatchDate } from "../../Matches/domain/MatchDate";
-import { MatchDateCriteria } from "../../Matches/domain/filter/MatchDateCriteria";
-import { Match } from "../../Matches/domain/Match";
+import { Criteria } from "../../../Filter/Criteria";
+import { Filter } from "../../../Filter/Filter";
+import { MatchDate } from "../../../Matches/domain/MatchDate";
+import { MatchDateCriteria } from "../../../Matches/domain/filter/MatchDateCriteria";
+import { Match } from "../../../Matches/domain/Match";
 
 export type ScrapperSingleResult<T extends Object> = {
   date: DateValueObject;

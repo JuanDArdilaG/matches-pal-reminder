@@ -1,5 +1,6 @@
 import { Match } from "../../../Matches/domain/Match";
 import fs from "fs";
+import { Logger } from "../../../System/Logger/Logger";
 
 const ErrorLoadingCache = new Error("No se pudo cargar el cache");
 
@@ -16,6 +17,13 @@ export type BrowserCacheConfig = {
 
 export class BrowserCache {
   constructor(private _config: BrowserCacheConfig) {}
+
+  static oneDayCache(fileName: string): BrowserCache {
+    return new BrowserCache({
+      fileName,
+      ttl: 1000 * 60 * 60 * 24,
+    });
+  }
 
   save(partidas: Match[]): void {
     const data: CacheData = {
@@ -50,6 +58,7 @@ export class BrowserCache {
       const cachedData = this.load();
       return Date.now() > cachedData.expiry;
     } catch (error) {
+      Logger.error((error as Error).message);
       return true;
     }
   }

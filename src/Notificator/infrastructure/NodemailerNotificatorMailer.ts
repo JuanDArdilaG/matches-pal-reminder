@@ -1,8 +1,12 @@
+import { EmailValueObject } from "@juandardilag/value-objects";
 import { Match } from "../../Matches/domain/Match";
 import { NotificatorMailer } from "../domain/NotificatorMailer";
 import { createTransport } from "nodemailer";
+import { Logger } from "../../System/Logger/Logger";
 
 export class NodemailerNotificatorMailer implements NotificatorMailer {
+  constructor(private _email: EmailValueObject) {}
+
   async send(matches: Match[]): Promise<void> {
     const matchesByLeague: { [liga: string]: Match[] } = {};
     for (const match of matches) {
@@ -32,17 +36,17 @@ export class NodemailerNotificatorMailer implements NotificatorMailer {
       }
       htmlData += "</table>";
     }
-    console.log({ htmlData });
+
     let transporter = createTransport({
       service: "gmail",
       auth: {
-        user: "juandardilag@gmail.com",
-        pass: "enjjoaijqqunxzol",
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
       },
     });
     let mailOptions = {
       from: "partidos-del-dia@gmail.com",
-      to: "juandardilag@gmail.com",
+      to: this._email.value,
       subject: "Partidos Del Día",
       html: htmlData,
     };
@@ -50,10 +54,10 @@ export class NodemailerNotificatorMailer implements NotificatorMailer {
     return new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          console.log(error);
+          Logger.error(`${error}`);
           reject(error);
         } else {
-          console.log("Email sent: " + info.response);
+          Logger.info("Email sent: " + info.response);
           resolve();
         }
       });
